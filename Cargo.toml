@@ -1,0 +1,26 @@
+[package]
+name = "huyer"
+version = "1.0.0"
+authors = ["Peter Opatřil"]
+description = "Simple alarm clock with optional GUI."
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+strip = true
+
+[features]
+default = ["gui"]
+# Uses GUI window for notifications
+gui = ["eframe"]
+# Doesn't produce console output on Windows
+pure-gui = ["gui"]
+
+[dependencies]
+anyhow = "1.0.68"
+clap = { version = "4.0.0", features = ["derive"] }
+# Works with both glow (OpenGL) and wgpu (WebGPU) renderers, but glow leads to less dependencies
+eframe = { version = "0.21.3", optional = true, default-features = false, features = ["default_fonts", "glow"] }
+scan_fmt =  { version = "0.2.6", default-features = false, features = ["std"] }
+time = { version = "0.3.20", features = ["local-offset", "macros"] }
