@@ -23,6 +23,7 @@ The application can work both as console and graphical application, depending on
 - `gui` (default): uses `egui` for notification window and possibly also to interactivaly sets the options.
   If unset, application prints into console and would try to get your attention with terminal bell.
 - `pure-gui`: doesn't create console window, like full GUI apps. This distinction is important on Windows. Note that with this option command line arguments still work, but app won't guarantee any feedback, notably to `--help`.
+- `toast` (default): Use system's notification system to announce alarm triggering. Currently implemented only on Windows.
 
 ## Trivia
 

@@ -48,8 +48,7 @@ fn parse_timespec(input: &str, current_time: OffsetDateTime) -> Result<Duration,
                 bail!("Missing suffix");
             } else if input.is_empty() {
                 bail!("No time specified");
-            }
-            else {
+            } else {
                 bail!("Unknown format");
             }
         }

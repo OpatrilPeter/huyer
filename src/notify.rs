@@ -14,7 +14,7 @@ mod cli {
     /// Ansi escape sequence that triggers the usually audio alert cue
     const BELL_SEQUENCE: &str = "\x07";
 
-    pub(crate) fn alarm(_target_time: OffsetDateTime, message: &str) {
+    pub(crate) fn alarm_ui(_target_time: OffsetDateTime, message: &str) {
         println!("{}{}", message, BELL_SEQUENCE);
     }
 }
@@ -110,7 +110,7 @@ mod gui {
         *args = new_args.into_inner();
     }
 
-    pub(crate) fn alarm(target_time: OffsetDateTime, message: &str) {
+    pub(crate) fn alarm_ui(target_time: OffsetDateTime, message: &str) {
         let native_options = eframe::NativeOptions {
             always_on_top: true,
             centered: true,
@@ -157,7 +157,39 @@ mod gui {
 }
 
 #[cfg(not(feature = "gui"))]
-pub(crate) use cli::{alarm, ask};
+pub(crate) use cli::{alarm_ui, ask};
 
 #[cfg(feature = "gui")]
-pub(crate) use gui::{alarm, ask};
+pub(crate) use gui::{alarm_ui, ask};
+
+#[cfg(all(windows, feature = "toast"))]
+fn alarm_toast(target_time: OffsetDateTime, message: &str) {
+    use crate::timespec_fmt;
+    use tauri_winrt_notification::{Duration, LoopableSound, Scenario, Sound, Toast};
+
+    // Our application isn't registered in system and it doesn't work without one, so we use the recommended hardcoded fallback fake AppId
+    const APP_ID: &str = Toast::POWERSHELL_APP_ID;
+
+    let res = Toast::new(APP_ID)
+        .title(&format!(
+            "Alarm triggered at {}!",
+            timespec_fmt(target_time)
+        ))
+        .text1(message)
+        .scenario(Scenario::Alarm)
+        .sound(Some(Sound::Loop(LoopableSound::Alarm)))
+        .duration(Duration::Long)
+        .show();
+    
+    if let Err(err) = res {
+        log!("Unable to trigger toast notification: {err}.");
+    }
+}
+
+#[cfg(not(all(windows, feature = "toast")))]
+fn alarm_toast(_target_time: OffsetDateTime, _message: &str) {}
+
+pub(crate) fn alarm(target_time: OffsetDateTime, message: &str) {
+    alarm_toast(target_time, message);
+    alarm_ui(target_time, message);
+}
