@@ -13,6 +13,11 @@ macro_rules! log {
         {
             println!($($tokens)+);
         }
+        // Dummy code to mark the passed arguments as used
+        #[cfg(feature = "pure-gui")]
+        {
+            if false { let _ = format!($($tokens)+); }
+        }
     }
 }
 
